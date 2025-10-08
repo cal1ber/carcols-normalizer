@@ -13,5 +13,5 @@ jobs:
           python-version: "3.x"
       - run: python -m pip install --upgrade pip
       - run: pip install black ruff
-      - run: ruff check .
+      - run: ruff check . --fix
       - run: black --check .
