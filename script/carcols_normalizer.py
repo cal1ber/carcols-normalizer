@@ -5,30 +5,26 @@ carcols_normalizer.py
 Normalize runs of <Item>...</Item> blocks in carcols.meta by <type>, replacing each run with
 exactly four standardized <Item> entries (modifier values 25, 50, 75, 100). Creates a .bak
 backup before modifying any file. Includes an interactive backup cleaner.
-
-Usage:
-  python script/carcols_normalizer.py "E:\\path\\to\\root" --dry-run
-  python script/carcols_normalizer.py "E:\\path\\to\\root" --any
-  python script/carcols_normalizer.py "E:\\path\\to\\root" --clean-backups
 """
 
 from pathlib import Path
-import re
-import sys
-import shutil
 import argparse
+import re
+import shutil
 
-# NOTE: added the 'm' (MULTILINE) flag so ^ matches at the start of each line
-ITEM_RE = re.compile(r'(?ims)(^[ \t]*)<Item\b[^>]*>(.*?)</Item>')
-TYPE_RE = re.compile(r'(?is)<type>\s*([^<]+)\s*</type>')
+# Match each <Item>...</Item> block; capture leading indentation and the inner XML.
+ITEM_RE = re.compile(r"(?ims)(^[ \t]*)<Item\b[^>]*>(.*?)</Item>")
+# Grab the <type>...</type> value if present.
+TYPE_RE = re.compile(r"(?is)<type>\s*([^<]+)\s*</type>")
 
-# ---------- backup cleaner ----------
+
 def _human_size(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if n < 1024:
             return f"{n:.1f} {unit}"
         n /= 1024
     return f"{n:.1f} PB"
+
 
 def clean_backups(root: Path) -> int:
     """
@@ -59,9 +55,10 @@ def clean_backups(root: Path) -> int:
 
     print(f"Deleted {deleted} backup file(s).")
     return deleted
-# ------------------------------------
+
 
 def build_items(indent: str, vtype: str) -> str:
+    """Render four standardized <Item> blocks with modifiers 25/50/75/100."""
     out = []
     for val in (25, 50, 75, 100):
         out.append(
@@ -75,6 +72,7 @@ def build_items(indent: str, vtype: str) -> str:
         )
     return "".join(out)
 
+
 def scan_items(text: str):
     """Yield (start, end, indent, vtype or None) for each <Item> block."""
     for m in ITEM_RE.finditer(text):
@@ -83,26 +81,46 @@ def scan_items(text: str):
         vtype = tm.group(1).strip() if tm else None
         yield (m.start(), m.end(), indent, vtype)
 
+
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("root", nargs="?", default=r"DRIVE:\Localhost\txData\Server-Data\resources\PATH-TO-CARS\data")
-    ap.add_argument("--any", action="store_true",
-                    help="operate on ANY VMT_* type instead of just GEARBOX/BRAKES/ENGINE")
-    ap.add_argument("--dry-run", "-n", action="store_true", help="show what would change, do not write")
-    ap.add_argument("--name", default="carcols.meta", help="file name to search (default: carcols.meta)")
-    ap.add_argument("--clean-backups", action="store_true",
-                    help="scan for 'carcols.meta.bak' under ROOT and ask to delete them")
+    ap = argparse.ArgumentParser(
+        description="Normalize consecutive <Item> runs in carcols.meta files."
+    )
+    ap.add_argument(
+        "root",
+        nargs="?",
+        default=".",
+        help="root folder to scan (default: current directory)",
+    )
+    ap.add_argument(
+        "--any",
+        action="store_true",
+        help="operate on ANY VMT_* type (not only gearbox/brakes/engine)",
+    )
+    ap.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="show what would change; do not write files",
+    )
+    ap.add_argument(
+        "--name",
+        default="carcols.meta",
+        help="filename to target (default: carcols.meta)",
+    )
+    ap.add_argument(
+        "--clean-backups",
+        action="store_true",
+        help="scan for 'carcols.meta.bak' under ROOT and ask to delete them",
+    )
     args = ap.parse_args()
 
     root = Path(args.root)
-
-    # if requested, just run the cleaner and exit
     if args.clean_backups:
         clean_backups(root)
         return
 
     targets = {"VMT_GEARBOX", "VMT_BRAKES", "VMT_ENGINE"}
-
     updated = 0
 
     for meta in root.rglob(args.name):
@@ -116,7 +134,7 @@ def main():
             print(f"No <Item> blocks in {meta}")
             continue
 
-        # Group consecutive same-type items
+        # Group consecutive same-type items (only whitespace allowed between them)
         groups, i = [], 0
         while i < len(items):
             s, e, indent, vtype = items[i]
@@ -133,7 +151,11 @@ def main():
             while j < len(items):
                 s2, e2, _, vtype2 = items[j]
                 between = text[group_end:s2]
-                if vtype2 and vtype2.strip().upper() == vt and re.fullmatch(r"\s*", between, re.S):
+                if (
+                    vtype2
+                    and vtype2.strip().upper() == vt
+                    and re.fullmatch(r"\s*", between, re.S)
+                ):
                     group_end = e2
                     j += 1
                 else:
@@ -165,6 +187,7 @@ def main():
         updated += 1
 
     print(f"\nDone. Files updated: {updated}")
+
 
 if __name__ == "__main__":
     main()
