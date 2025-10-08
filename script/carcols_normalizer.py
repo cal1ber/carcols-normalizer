@@ -7,10 +7,11 @@ exactly four standardized <Item> entries (modifier values 25, 50, 75, 100). Crea
 backup before modifying any file. Includes an interactive backup cleaner.
 """
 
-from pathlib import Path
 import argparse
 import re
 import shutil
+from pathlib import Path  # <-- keep it here
+
 
 # Match each <Item>...</Item> block; capture leading indentation and the inner XML.
 ITEM_RE = re.compile(r"(?ims)(^[ \t]*)<Item\b[^>]*>(.*?)</Item>")
