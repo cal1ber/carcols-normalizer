@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <Item>
+    <identifier />
+    <modifier value="5" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_GEARBOX</type>
+  </Item>
+  <Item>
+    <identifier />
+    <modifier value="10" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_GEARBOX</type>
+  </Item>
+  <Item>
+    <identifier />
+    <modifier value="60" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_GEARBOX</type>
+  </Item>
+  <Item>
+    <identifier />
+    <modifier value="150" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_GEARBOX</type>
+  </Item>
+  <Item>
+    <identifier />
+    <modifier value="25" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_ENGINE</type>
+  </Item>
+    <Item>
+    <identifier />
+    <modifier value="245" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_ENGINE</type>
+  </Item>
+    <Item>
+    <identifier />
+    <modifier value="55" />
+    <audioApply value="1.000000" />
+    <weight value="0" />
+    <type>VMT_ENGINE</type>
+  </Item>
